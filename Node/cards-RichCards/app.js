@@ -3,7 +3,6 @@ require('dotenv-extended').load();
 
 var builder = require('botbuilder');
 var restify = require('restify');
-var Store = require('./store');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -15,23 +14,11 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
-    //appId: 'c9d1b29d-38b9-4192-9506-90a8a4eb9470',
-    //appPassword: 'L1CTe53TWgs36LQBEDefpuK'	
 });
 server.post('/api/messages', connector.listen());
 
 var bot = new builder.UniversalBot(connector, [
     function (session) {
-        // create the card based on selection
-        //var selectedCardName = 2;//results.response.entity;
-        var card = createThumbnailCard(session);//createCard(selectedCardName, session);
-
-        // attach the card to the reply message
-        var msg = new builder.Message(session).addAttachment(card);
-        session.send(msg);
-    }
-
-    /*function (session) {
         builder.Prompts.choice(session, 'What card would like to test?', CardNames, {
             maxRetries: 3,
             retryPrompt: 'Ooops, what you wrote is not a valid option, please try again'
@@ -46,7 +33,7 @@ var bot = new builder.UniversalBot(connector, [
         // attach the card to the reply message
         var msg = new builder.Message(session).addAttachment(card);
         session.send(msg);
-    }*/
+    }
 ]);
 
 var HeroCardName = 'Hero card';
@@ -81,132 +68,27 @@ function createCard(selectedCardName, session) {
 
 function createHeroCard(session) {
     return new builder.HeroCard(session)
-        .title('CSM Chatbot')
-        .subtitle('I can answer questions as below.\nPlease click them.')
-        .text('--------------------------------------------------')
+        .title('BotFramework Hero Card')
+        .subtitle('Your bots — wherever your users are talking')
+        .text('Build and connect intelligent bots to interact with your users naturally wherever they are, from text/sms to Skype, Slack, Office 365 mail and other popular services.')
         .images([
-            builder.CardImage.create(session, 'http://www.gulfnet.co.jp/images/product_csm_01.jpg')
+            builder.CardImage.create(session, 'https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg')
         ])
         .buttons([
-            builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know Features'),
-            builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know Cases'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know Costs'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know Operating Environments'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know System Coorporation'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Shown Me a Demo'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Send Me Materials'),
-            builder.CardAction.dialogAction(session, "weather", "Seattle, WA", "Current Weather")		
-        ]);		
+            builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Get Started')
+        ]);
 }
 
 function createThumbnailCard(session) {
     return new builder.ThumbnailCard(session)
-        .title('CSM Chatbot')
-        .subtitle('I can answer questions as below.\nPlease click them.')
-        .text('-----------------------------------------------------')
+        .title('BotFramework Thumbnail Card')
+        .subtitle('Your bots — wherever your users are talking')
+        .text('Build and connect intelligent bots to interact with your users naturally wherever they are, from text/sms to Skype, Slack, Office 365 mail and other popular services.')
         .images([
-            builder.CardImage.create(session, 'https://www.atpress.ne.jp/releases/115522/logo_org.jpg')
+            builder.CardImage.create(session, 'https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg')
         ])
         .buttons([
-            builder.CardAction.dialogAction(session, "CSMFeatures", "https://blog.botframework.com/", "Know features"),
-            builder.CardAction.openUrl(session, 'http://www.gulfnet.co.jp/jirei.html', 'Know Cases'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know Costs'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know Operating Environments'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Know System Coorporation'),
-			builder.CardAction.dialogAction(session, "DemoVideo", "https://blog.botframework.com/", 'Show Me a Demo'),
-			builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Send Me Materials'),
-			builder.CardAction.dialogAction(session, "ContactUs", "https://blog.botframework.com/", "Contact us")
-        ]);
-}
-
-bot.beginDialogAction('CSMFeatures', '/News');
-bot.beginDialogAction('DemoVideo', '/ShowVideo');
-bot.beginDialogAction('ContactUs', '/SendEmail')
-
-// Create the dialog itself.
-bot.dialog('/News', [
-    function (session, args) {
-        //session.endDialog("Loading news from: " + args.data);
-		        // Async search
-        Store
-            .searchHotels('CSM')
-            .then(function (feature) {
-                // args
-                session.send('There are %d features in CSM:', feature.length);
-
-                var message = new builder.Message()
-                    .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(feature.map(hotelAsAttachment));
-
-                session.send(message);
-
-                // End
-                session.endDialog();
-            });
-    }
-]);
-
-bot.dialog('/ShowVideo', [
-	function (session, args) {
-
-				var card = createVideoCard(session);
-				var message = new builder.Message().addAttachment(card);
-                session.send(message);
-                session.endDialog();
-            //});		
-    }
-]);	
-
-bot.dialog('/SendEmail', [ 
-    function(session){
-	builder.Prompts.text(session,'Please provide your email ID');	
-	},	
-	function (session, args) {
-			//// send email ////
-		    var emailID = args.response;
-			console.log('Your email ID is ' + emailID);
-			var nodemailer = require('nodemailer');
-			var transporter = nodemailer.createTransport({
-			     service: 'gmail',
-			     //host: 'smtp.gmail.com',
-				 //port: 465,
-				 //secure: true, // use SSL 
-			  auth: {
-				user: 'nanhe.gupta@gmail.com',
-				pass: 'kamakhya@Maa'
-			  }
-			});
-
-			var mailOptions = {
-			  from: 'nanhe.gupta@gmail.com',
-			  to: 'ngupta@gulfnet.co.jp',
-			  subject: 'Sending Email using CSM ChatBot',
-			  text: 'Test email! \n Please contact: ' + emailID
-			};
-
-			transporter.sendMail(mailOptions, function(error, info){
-			  if (error) {
-				console.log(error);
-			  } else {
-				console.log('Email sent: ' + info.response);
-				builder.Prompts.text(session, 'Thank You! \n A sales representative will contact you within one business day.');
-				session.endDialog();
-			  }
-			});				
-			///////////////////	
-	}
-]);	
-// Helpers
-function hotelAsAttachment(hotel) {
-    return new builder.HeroCard()
-        .title(hotel.name)
-        .subtitle('This is a review text')
-        .images([new builder.CardImage().url(hotel.image)])
-        .buttons([
-            new builder.CardAction()
-                .title('More details')
-                .type('openUrl')
-                .value('https://www.bing.com/search?q=hotels+in+' + encodeURIComponent(hotel.location))
+            builder.CardAction.openUrl(session, 'https://docs.microsoft.com/bot-framework/', 'Get Started')
         ]);
 }
 
@@ -252,15 +134,15 @@ function createAnimationCard(session) {
 
 function createVideoCard(session) {
     return new builder.VideoCard(session)
-        .title('GulfNet CSM')
-        .subtitle('Demo Video')
-        .text('')
+        .title('Big Buck Bunny')
+        .subtitle('by the Blender Institute')
+        .text('Big Buck Bunny (code-named Peach) is a short computer-animated comedy film by the Blender Institute, part of the Blender Foundation. Like the foundation\'s previous film Elephants Dream, the film was made using Blender, a free software application for animation made by the same foundation. It was released as an open-source film under Creative Commons License Attribution 3.0.')
         .image(builder.CardImage.create(session, 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/220px-Big_buck_bunny_poster_big.jpg'))
         .media([
-            { url: 'https://www.youtube.com/watch?v=mbo8_VHaBWw' }
+            { url: 'http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4' }
         ])
         .buttons([
-            builder.CardAction.openUrl(session, 'https://reg34.smp.ne.jp/regist/is?SMPFORM=lirf-mcrbl-e090e0cde7baf27008853ff94758470e', 'Contact us')
+            builder.CardAction.openUrl(session, 'https://peach.blender.org/', 'Learn More')
         ]);
 }
 
