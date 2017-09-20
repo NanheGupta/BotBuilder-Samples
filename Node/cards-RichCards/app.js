@@ -3,7 +3,7 @@ require('dotenv-extended').load();
 
 var builder = require('botbuilder');
 var restify = require('restify');
-var Store = require('./store');
+//var Store = require('./store');
 
 // Setup Restify Server
 var server = restify.createServer();
